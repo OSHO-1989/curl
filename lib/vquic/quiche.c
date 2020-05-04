@@ -34,6 +34,7 @@
 #include "multiif.h"
 #include "connect.h"
 #include "strerror.h"
+#include "dynbuf.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -64,6 +65,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
 static Curl_recv h3_stream_recv;
 static Curl_send h3_stream_send;
 
+static FILE *qlog_file; /* not thread-safe */
 
 static int quiche_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
@@ -198,6 +200,38 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
+
+  /* Known to not work on Windows */
+#if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
+  {
+    const char *qlog_dir = getenv("QLOGDIR");
+    if(qlog_dir) {
+      struct dynbuf fname;
+      unsigned int i;
+      Curl_dyn_init(&fname, DYN_QLOG_NAME);
+      result = Curl_dyn_add(&fname, qlog_dir);
+      if(!result)
+        result = Curl_dyn_add(&fname, "/");
+      for(i = 0; (i < sizeof(qs->scid)) && !result; i++) {
+        char hex[3];
+        msnprintf(hex, 3, "%02x", qs->scid[i]);
+        result = Curl_dyn_add(&fname, hex);
+      }
+      if(!result)
+        result = Curl_dyn_add(&fname, ".qlog");
+
+      if(!result) {
+        qlog_file = fopen(Curl_dyn_ptr(&fname), "wb");
+        if(qlog_file)
+          quiche_conn_set_qlog_fd(qs->conn, fileno(qlog_file),
+                                "qlog title", "curl qlog");
+      }
+      Curl_dyn_free(&fname);
+      if(result)
+        return result;
+    }
+  }
+#endif
 
   result = flush_egress(conn, sockfd, qs);
   if(result)
