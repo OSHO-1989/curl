@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,7 +44,7 @@
 static const char       cnOID[] = "2.5.4.3";    /* Common name. */
 static const char       sanOID[] = "2.5.29.17"; /* Subject alternative name. */
 
-static const curl_OID   OIDtable[] = {
+static const struct Curl_OID OIDtable[] = {
   { "1.2.840.10040.4.1",        "dsa" },
   { "1.2.840.10040.4.3",        "dsa-with-sha1" },
   { "1.2.840.10045.2.1",        "ecPublicKey" },
@@ -103,16 +103,16 @@ static const curl_OID   OIDtable[] = {
  * Please note there is no pretention here to rewrite a full SSL library.
  */
 
-static const char *getASN1Element(curl_asn1Element *elem,
+static const char *getASN1Element(struct Curl_asn1Element *elem,
                                   const char *beg, const char *end)
   WARN_UNUSED_RESULT;
 
-static const char *getASN1Element(curl_asn1Element *elem,
+static const char *getASN1Element(struct Curl_asn1Element *elem,
                                   const char *beg, const char *end)
 {
   unsigned char b;
   unsigned long len;
-  curl_asn1Element lelem;
+  struct Curl_asn1Element lelem;
 
   /* Get a single ASN.1 element into `elem', parse ASN.1 string at `beg'
      ending at `end'.
@@ -176,9 +176,9 @@ static const char *getASN1Element(curl_asn1Element *elem,
  * Search the null terminated OID or OID identifier in local table.
  * Return the table entry pointer or NULL if not found.
  */
-static const curl_OID * searchOID(const char *oid)
+static const struct Curl_OID *searchOID(const char *oid)
 {
-  const curl_OID *op;
+  const struct Curl_OID *op;
   for(op = OIDtable; op->numoid; op++)
     if(!strcmp(op->numoid, oid) || strcasecompare(op->textoid, oid))
       return op;
@@ -565,7 +565,7 @@ static const char *UTime2str(const char *beg, const char *end)
  * Convert an ASN.1 element to a printable string.
  * Return the dynamically allocated string, or NULL if an error occurs.
  */
-static const char *ASN1tostr(curl_asn1Element *elem, int type)
+static const char *ASN1tostr(struct Curl_asn1Element *elem, int type)
 {
   if(elem->constructed)
     return NULL; /* No conversion of structured elements. */

@@ -139,6 +139,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct {
   HCRYPTPROV hCryptProv;
   HCRYPTHASH hHash;
@@ -184,6 +185,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct {
   void *data;
   unsigned long size;
@@ -266,6 +268,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD4_u32plus;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct {
   MD4_u32plus lo, hi;
   MD4_u32plus a, b, c, d;

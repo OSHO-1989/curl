@@ -179,6 +179,7 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct {
   HCRYPTPROV hCryptProv;
   HCRYPTHASH hHash;
@@ -261,6 +262,7 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD5_u32plus;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct {
   MD5_u32plus lo, hi;
   MD5_u32plus a, b, c, d;
@@ -528,7 +530,7 @@ static void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 
 #endif /* CRYPTO LIBS */
 
-const HMAC_params Curl_HMAC_MD5[] = {
+const struct HMAC_params Curl_HMAC_MD5[] = {
   {
     /* Hash initialization function. */
     CURLX_FUNCTION_CAST(HMAC_hinit_func, MD5_Init),
@@ -545,7 +547,7 @@ const HMAC_params Curl_HMAC_MD5[] = {
   }
 };
 
-const MD5_params Curl_DIGEST_MD5[] = {
+const struct MD5_params Curl_DIGEST_MD5[] = {
   {
     /* Digest initialization function */
     CURLX_FUNCTION_CAST(Curl_MD5_init_func, MD5_Init),
@@ -573,9 +575,9 @@ void Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
   MD5_Final(outbuffer, &ctx);
 }
 
-MD5_context *Curl_MD5_init(const MD5_params *md5params)
+struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
 {
-  MD5_context *ctxt;
+  struct MD5_context *ctxt;
 
   /* Create MD5 context */
   ctxt = malloc(sizeof(*ctxt));
@@ -597,7 +599,7 @@ MD5_context *Curl_MD5_init(const MD5_params *md5params)
   return ctxt;
 }
 
-CURLcode Curl_MD5_update(MD5_context *context,
+CURLcode Curl_MD5_update(struct MD5_context *context,
                          const unsigned char *data,
                          unsigned int len)
 {
@@ -606,7 +608,7 @@ CURLcode Curl_MD5_update(MD5_context *context,
   return CURLE_OK;
 }
 
-CURLcode Curl_MD5_final(MD5_context *context, unsigned char *result)
+CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 

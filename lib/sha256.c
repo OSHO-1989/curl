@@ -73,8 +73,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-typedef struct sha256_ctx SHA256_CTX;
-
 static void SHA256_Init(SHA256_CTX *ctx)
 {
   sha256_init(ctx);
@@ -196,16 +194,16 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 
 #include <wincrypt.h>
 
-typedef struct {
+struct sha256_ctx {
   HCRYPTPROV hCryptProv;
   HCRYPTHASH hHash;
-} SHA256_CTX;
+};
 
 #if !defined(CALG_SHA_256)
 #define CALG_SHA_256 0x0000800c
 #endif
 
-static void SHA256_Init(SHA256_CTX *ctx)
+static void SHA256_Init(struct sha256_ctx *ctx)
 {
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
@@ -213,14 +211,14 @@ static void SHA256_Init(SHA256_CTX *ctx)
   }
 }
 
-static void SHA256_Update(SHA256_CTX *ctx,
+static void SHA256_Update(struct sha256_ctx *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
   CryptHashData(ctx->hHash, (unsigned char *) data, length, 0);
 }
 
-static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
+static void SHA256_Final(unsigned char *digest, struct sha256_ctx *ctx)
 {
   unsigned long length;
 
@@ -280,7 +278,7 @@ do {                                                          \
 } while(0)
 #endif
 
-typedef struct sha256_state {
+struct sha256_ctx {
 #ifdef HAVE_LONGLONG
   unsigned long long length;
 #else
@@ -288,7 +286,7 @@ typedef struct sha256_state {
 #endif
   unsigned long state[8], curlen;
   unsigned char buf[64];
-} SHA256_CTX;
+};
 
 /* The K array */
 static const unsigned long K[64] = {
